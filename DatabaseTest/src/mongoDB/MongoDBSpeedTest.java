@@ -11,20 +11,15 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Filters;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bson.BsonDocument;
-import org.bson.BsonString;
 import org.bson.Document;
 
 /**
@@ -37,18 +32,23 @@ public class MongoDBSpeedTest {
 
         long timeStart = new Date().getTime() / 1000;
         for (int i = 1; i < 1001; i++) {
-
             try {
+                // Loading the driver
                 Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
                 mongoLogger.setLevel(Level.SEVERE);
+                // Creating a mongo client
                 MongoClient mongoClient = new MongoClient("localhost", 27017);
+                // Accessing the database
                 DB db = mongoClient.getDB("alonzo");
+                // Creating collection
                 DBCollection collection = db.getCollection("dataCollection");
+                // Creating an object
                 BasicDBObject object = new BasicDBObject("Column_1", i)
                         .append("Column_2", i + 1)
                         .append("Column_3", i + 2)
                         .append("Column_4", i + 3)
                         .append("Column_5", i + 4);
+                // Inserting the object to the collection
                 collection.insert(object);
                 System.out.println("Inserted successfully " + i);
 
@@ -99,7 +99,7 @@ public class MongoDBSpeedTest {
                 DB db = mongoClient.getDB("alonzo");
                 DBCollection collection = db.getCollection("dataCollection");
 
-//                BasicDBObject remove1000 = new BasicDBObject("Column_1", i);
+                //  Removing data from the collection which has the key of Column_1 with the value equivalent to the value of
                 collection.remove(new BasicDBObject("Column_1", i));
                 System.out.println("Successfully deleted! " + i);
 
@@ -121,7 +121,6 @@ public class MongoDBSpeedTest {
             DB db = mongoClient.getDB("alonzo");
             DBCollection collection = db.getCollection("dataCollection");
             for (int i = 1; i < 1001; i++) {
-//                BasicDBObject remove1000 = new BasicDBObject("Column_1", i);
                 collection.remove(new BasicDBObject("Column_1", i));
                 System.out.println("Successfully deleted! " + i);
             }
@@ -146,23 +145,26 @@ public class MongoDBSpeedTest {
             MongoClient mongoClient = new MongoClient("localhost", 27017);
             DB db = mongoClient.getDB("alonzo");
             DBCollection collection = db.getCollection("dataCollection");
-
-            BasicDBObject query = new BasicDBObject();
-            query.put("Column_1", i);
+            
+            // Creating a database object with the key of Column_1 with the value i
+            BasicDBObject query = new BasicDBObject("Column_1", i);
+            // Executing the query find() with the value of the object provided above
             DBCursor c = collection.find(query);
-
+            
+            // Iterating through the result of the query
             while (c.hasNext()) {
                 avgColumn_1 += Integer.parseInt(c.next().get("Column_1").toString());
             }
 
-            BasicDBObject query2 = new BasicDBObject();
-            query2.put("Column_2", i + 1);
+            // Creating a database object with the key of Column_2 with the value i + 1
+            BasicDBObject query2 = new BasicDBObject("Column_2", i + 1);
             DBCursor c2 = collection.find(query2);
 
             while (c2.hasNext()) {
                 avgColumn_2 += Integer.parseInt(c2.next().get("Column_2").toString());
             }
 
+            // Creating a database object with the key of Column_3 with the value i + 2
             BasicDBObject query3 = new BasicDBObject();
             query3.put("Column_3", i + 2);
             DBCursor c3 = collection.find(query3);
@@ -171,6 +173,7 @@ public class MongoDBSpeedTest {
                 avgColumn_3 += Integer.parseInt(c3.next().get("Column_3").toString());
             }
 
+            // Creating a database object with the key of Column_4 with the value i + 3
             BasicDBObject query4 = new BasicDBObject();
             query4.put("Column_4", i + 3);
             DBCursor c4 = collection.find(query4);
@@ -179,6 +182,7 @@ public class MongoDBSpeedTest {
                 avgColumn_4 += Integer.parseInt(c4.next().get("Column_4").toString());
             }
 
+            // Creating a database object with the key of Column_5 with the value i + 4
             BasicDBObject query5 = new BasicDBObject();
             query5.put("Column_5", i + 4);
             DBCursor c5 = collection.find(query5);
@@ -206,7 +210,7 @@ public class MongoDBSpeedTest {
     int avgColumn_4 = 0;
     int avgColumn_5 = 0;
 
-    public void getAverageUsingMongoAverage() {
+    public void getAverageUsingMongoAgregation() {
         long timeStart = new Date().getTime() / 1000;
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
         mongoLogger.setLevel(Level.SEVERE);
@@ -300,7 +304,7 @@ public class MongoDBSpeedTest {
 //        } catch (UnknownHostException ex) {
 //            Logger.getLogger(MongoDBSpeedTest.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-        db.getAverageUsingMongoAverage();
+        db.getAverageUsingMongoAgregation();
 //        db.GetAverageUsingJavaLoop();
     }
 }
