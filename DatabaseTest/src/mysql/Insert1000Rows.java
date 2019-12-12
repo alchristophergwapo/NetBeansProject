@@ -136,7 +136,6 @@ public class Insert1000Rows {
     
     public void getAverageInLoop() {
         try {
-            String query = "SELECT * FROM 1000rowinsert";
             double total1 = 0;
             double total2 = 0;
             double total3 = 0;
@@ -144,6 +143,7 @@ public class Insert1000Rows {
             double total5 = 0;
             Date dateStart = new Date();
             long start = dateStart.getTime();
+            String query = "SELECT * FROM 1000rowinsert";
             Connection connection = connectToDB();
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
@@ -153,6 +153,10 @@ public class Insert1000Rows {
                 total3 += rs.getInt(3);
                 total4 += rs.getInt(4);
                 total5 += rs.getInt(5);
+            }
+            
+            for (int i = 1; i < 10001; i++) {
+                
             }
             connection.close();
             Date dateEnd = new Date();
