@@ -6,17 +6,25 @@
 package mongoDB;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.model.Aggregates.*;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.BsonField;
+import com.mongodb.client.model.Filters;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.bson.Document;
 
 /**
@@ -138,6 +146,7 @@ public class MongoDBSpeedTest {
             MongoClient mongoClient = new MongoClient("localhost", 27017);
             DB db = mongoClient.getDB("alonzo");
             DBCollection collection = db.getCollection("dataCollection");
+
             BasicDBObject query = new BasicDBObject();
             query.put("Column_1", i);
             DBCursor c = collection.find(query);
@@ -191,27 +200,91 @@ public class MongoDBSpeedTest {
         System.out.println("Time interval in milliseconds: " + (timeFinish - timeStart));
     }
 
+    int avgColumn_1 = 0;
+    int avgColumn_2 = 0;
+    int avgColumn_3 = 0;
+    int avgColumn_4 = 0;
+    int avgColumn_5 = 0;
+
     public void getAverageUsingMongoAverage() {
         long timeStart = new Date().getTime() / 1000;
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
         mongoLogger.setLevel(Level.SEVERE);
-        MongoClient mongoClient = new MongoClient("localhost", 27017);
-        DB db = mongoClient.getDB("alonzo");
-        DBCollection collection = db.getCollection("dataCollection");
+        MongoClient mongoClient = new MongoClient();
+        MongoDatabase database = mongoClient.getDatabase("alonzo");
+        MongoCollection<Document> collection = database.getCollection("dataCollection");
+
+        Block<Document> addCol1Value = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                avgColumn_1 += Integer.parseInt(document.get("_id").toString());
+            }
+        };
+        Block<Document> addCol2Value = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                avgColumn_2 += Integer.parseInt(document.get("_id").toString());
+            }
+        };
+        Block<Document> addCol3Value = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                avgColumn_3 += Integer.parseInt(document.get("_id").toString());
+            }
+        };
+        Block<Document> addCol4Value = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                avgColumn_4 += Integer.parseInt(document.get("_id").toString());
+            }
+        };
+        Block<Document> addCol5Value = new Block<Document>() {
+            @Override
+            public void apply(final Document document) {
+                avgColumn_5 += Integer.parseInt(document.get("_id").toString());
+            }
+        };
         for (int i = 1; i < 1001; i++) {
-
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq("Column_1", i)),
+                            Aggregates.group("$Column_1")
+                    )
+            ).forEach(addCol1Value);
             
-AggregateIterable output = collection.aggregate(Arrays.asList(
-                unwind("$views"),
-                match(new Document("views.isActive",true)),
-                sort(new Document("views.date",1)),
-                limit(200)
-//                project(new Document("_id",0)
-//                        .append("url","$views.url")
-//                        .append("date","$views.date"))
-));
-
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq("Column_2", i+1)),
+                            Aggregates.group("$Column_2")
+                    )
+            ).forEach(addCol2Value);
+            
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq("Column_3", i+2)),
+                            Aggregates.group("$Column_3")
+                    )
+            ).forEach(addCol3Value);
+            
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq("Column_4", i+3)),
+                            Aggregates.group("$Column_4")
+                    )
+            ).forEach(addCol4Value);
+            
+            collection.aggregate(
+                    Arrays.asList(
+                            Aggregates.match(Filters.eq("Column_5", i+4)),
+                            Aggregates.group("$Column_5")
+                    )
+            ).forEach(addCol5Value);
         }
+        System.out.println("Column 1 Average: " + avgColumn_1 / 1000);
+        System.out.println("Column 2 Average: " + avgColumn_2 / 1000);
+        System.out.println("Column 3 Average: " + avgColumn_3 / 1000);
+        System.out.println("Column 4 Average: " + avgColumn_4 / 1000);
+        System.out.println("Column 5 Average: " + avgColumn_5 / 1000);
         long timeFinish = new Date().getTime() / 1000;
         System.out.println("Time interval in seconds: " + (timeFinish - timeStart));
     }
