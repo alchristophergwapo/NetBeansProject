@@ -6,8 +6,6 @@
 package filehandling;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -15,7 +13,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +22,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
@@ -192,6 +187,7 @@ public class Dashboard extends javax.swing.JFrame {
                             data += userListTable.getValueAt(row, i) + "\n";
                         }
                         editData();
+                        frame.setVisible(false);
                     }
                     data = "";
                 }
@@ -205,6 +201,7 @@ public class Dashboard extends javax.swing.JFrame {
                             data += userListTable.getValueAt(row, i) + "\n";
                         }
                         delete();
+                        frame.setVisible(false);
                     }
                     data = "";
                 }
@@ -362,6 +359,7 @@ public class Dashboard extends javax.swing.JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        tm.setRowCount(0);
         retrieveData();
     }
 
